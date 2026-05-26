@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            AIM Notes
+        </title>
+    </head>
+    <body>
+        <div class = "hero">
+            <h1>Welcome back, <span id="userName"></span></h1>
+            <button id = "newProject">New Project</button>
+        </div>
+
+        <div class = "projects">
+            <div id = "projectList"></div>
+        </div>
+
+        <div>
+            <a href="/api/auth/logout">
+                <span>Logout</span>
+            </a>
+        </div>
+
+        <script>
+            fetch('/api/me')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('userName').textContent = data.name
+            })
+            fetch('/api/notes')
+            .then(response=>response.json())
+            .then(data=> {
+                data.forEach(note => {
+                    const card = document.createElement('div')
+                    card.textContent = note.projectName
+                    document.getElementById('projectList').appendChild(card)
+                    card.onclick = () => {
+                        window.location.href = `/api/editor?id=${note.id}`
+                    }
+                })
+            })
+            newProject.onclick = () => {
+                const newName = prompt("Name your project:")
+                if (newName){
+                    fetch('/api/notes', {
+                        method: "POST",
+                        body: JSON.stringify({ projectName: newName }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        window.location.href = response.url
+                    })
+                }
+            }
+        </script>
+    </body>
+</html>

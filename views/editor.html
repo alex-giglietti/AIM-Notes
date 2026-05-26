@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            AIM Notes Project
+        </title>
+    </head>
+    <body>
+        <div id="Toolbar">
+            <h1 id="projectName"></h1>
+        </div>
+        <textarea id="editor" placeholder = "Begin typing...">
+            
+        </textarea>
+        <div>
+            <a href="/api/projects">
+                Back to Projects
+            </a>
+        </div>
+    </body>
+    
+    <script>
+        fetch('/api/me')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('userName').textContent = data.name
+        })
+        const params = new URLSearchParams(window.location.search)
+        const id = params.get('id')
+        fetch(`/api/note?id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            const { projectName, projectData } = data[0]
+            document.getElementById('projectName').textContent = projectName
+            document.getElementById('editor').textContent = projectData
+        })
+    </script>
+</html>
