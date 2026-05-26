@@ -1,12 +1,300 @@
 <!DOCTYPE html>
-<html>
-    <head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AIM Notes — Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700;800&family=Poppins:wght@400;600&family=JetBrains+Mono:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cyan:    #00BFFF;
+      --magenta: #FF00CC;
+      --indigo:  #2200CC;
+      --purple:  #BB00CC;
+      --white:   #F4F4F8;
+      --bg:      #0A0A0C;
+      --surface: #111114;
+      --border:  rgba(0,191,255,0.15);
+    }
 
-    </head>
-    <body>
-        <h1>
-            Login to AIM Notes
-        </h1>
-        <a href="/api/auth/login"><span>Login With Google</span></a>
-    </body>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,191,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,191,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      animation: gridDrift 20s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes gridDrift {
+      0%   { transform: translate(0,0); }
+      100% { transform: translate(40px, 40px); }
+    }
+
+    /* Glowing orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: var(--cyan);
+      top: -150px; left: -100px;
+      animation: float1 8s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: var(--magenta);
+      bottom: -100px; right: -80px;
+      animation: float2 10s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: var(--indigo);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: float3 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes float1 { to { transform: translate(40px, 60px); } }
+    @keyframes float2 { to { transform: translate(-40px, -50px); } }
+    @keyframes float3 { to { transform: translate(-50%, -60%); } }
+
+    /* Card */
+    .card {
+      position: relative;
+      z-index: 10;
+      background: rgba(17,17,20,0.85);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 52px 48px 48px;
+      width: 420px;
+      max-width: 94vw;
+      backdrop-filter: blur(24px);
+      box-shadow:
+        0 0 0 1px rgba(0,191,255,0.08),
+        0 32px 64px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(0,191,255,0.12);
+      animation: cardIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Logo mark */
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 36px;
+      animation: cardIn 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .logo-icon {
+      width: 48px; height: 48px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .logo-aim {
+      font-family: 'Montserrat Alternates', sans-serif;
+      font-weight: 800;
+      font-size: 28px;
+      color: var(--cyan);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-sub {
+      font-family: 'Poppins', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Divider */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin-bottom: 32px;
+    }
+
+    /* Heading */
+    .card h1 {
+      font-family: 'Montserrat Alternates', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--white);
+      margin-bottom: 8px;
+      animation: cardIn 0.7s 0.15s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .card p {
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 36px;
+      line-height: 1.6;
+      animation: cardIn 0.7s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    /* Google login button */
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 24px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--white);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      animation: cardIn 0.7s 0.25s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .btn-google::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,191,255,0.1), rgba(255,0,204,0.08));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .btn-google:hover {
+      border-color: rgba(0,191,255,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,191,255,0.15);
+    }
+
+    .btn-google:hover::before { opacity: 1; }
+    .btn-google:active { transform: translateY(0); }
+
+    .btn-google svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-google span {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Footer note */
+    .card-footer {
+      margin-top: 28px;
+      text-align: center;
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.22);
+      animation: cardIn 0.7s 0.3s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    .card-footer span {
+      color: var(--cyan);
+      opacity: 0.7;
+    }
+
+    /* Cyan accent bar at top of card */
+    .card-accent {
+      position: absolute;
+      top: 0; left: 20px; right: 20px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="card">
+    <div class="card-accent"></div>
+
+    <div class="logo-row">
+      <!-- AIM icon SVG inline -->
+      <svg class="logo-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21" stroke="#00BFFF" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <circle cx="24" cy="3"  r="2.5" fill="#00BFFF"/>
+        <circle cx="24" cy="45" r="2.5" fill="#00BFFF"/>
+        <circle cx="3"  cy="24" r="2.5" fill="#00BFFF"/>
+        <circle cx="45" cy="24" r="2.5" fill="#00BFFF"/>
+        <circle cx="24" cy="24" r="10" stroke="#00BFFF" stroke-width="1.5"/>
+        <text x="24" y="29" text-anchor="middle" font-family="Montserrat Alternates, sans-serif" font-weight="800" font-size="13" fill="#00BFFF">A</text>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-aim">AIM Notes</span>
+        <span class="logo-sub">AI Monetizations</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h1>Welcome back</h1>
+    <p>Sign in to access your notes, projects,<br/>and AI-powered workspace.</p>
+
+    <a href="/api/auth/login" class="btn-google">
+      <!-- Google "G" logo -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      <span>Continue with Google</span>
+    </a>
+
+    <div class="card-footer">
+      Secure login via Google OAuth &nbsp;·&nbsp; <span>AIM</span> © 2026
+    </div>
+  </div>
+
+</body>
 </html>

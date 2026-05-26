@@ -1,59 +1,457 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>
-            AIM Notes
-        </title>
-    </head>
-    <body>
-        <div class = "hero">
-            <h1>Welcome back, <span id="userName"></span></h1>
-            <button id = "newProject">New Project</button>
-        </div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AIM Notes — My Projects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@700;800&family=Poppins:wght@400;500;600&family=JetBrains+Mono:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cyan:       #00BFFF;
+      --magenta:    #FF00CC;
+      --indigo:     #2200CC;
+      --purple:     #BB00CC;
+      --white:      #F4F4F8;
+      --bg:         #0A0A0C;
+      --surface:    #111114;
+      --surface2:   #16161A;
+      --border:     rgba(0,191,255,0.12);
+      --border2:    rgba(255,255,255,0.07);
+      --text-mute:  rgba(255,255,255,0.4);
+      --text-dim:   rgba(255,255,255,0.22);
+    }
 
-        <div class = "projects">
-            <div id = "projectList"></div>
-        </div>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        <div>
-            <a href="/api/auth/logout">
-                <span>Logout</span>
-            </a>
-        </div>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        <script>
-            fetch('/api/me')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('userName').textContent = data.name
-            })
-            fetch('/api/notes')
-            .then(response=>response.json())
-            .then(data=> {
-                data.forEach(note => {
-                    const card = document.createElement('div')
-                    card.textContent = note.projectName
-                    document.getElementById('projectList').appendChild(card)
-                    card.onclick = () => {
-                        window.location.href = `/api/editor?id=${note.id}`
-                    }
-                })
-            })
-            newProject.onclick = () => {
-                const newName = prompt("Name your project:")
-                if (newName){
-                    fetch('/api/notes', {
-                        method: "POST",
-                        body: JSON.stringify({ projectName: newName }),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => {
-                        window.location.href = response.url
-                    })
-                }
-            }
-        </script>
-    </body>
+    /* ── TOP NAVIGATION BAR ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      height: 60px;
+      background: rgba(10,10,12,0.9);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      gap: 16px;
+    }
+
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .topbar-logo svg { width: 32px; height: 32px; }
+
+    .topbar-brand {
+      font-family: 'Montserrat Alternates', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      color: var(--cyan);
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border2);
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .topbar-spacer { flex: 1; }
+
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-name {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--magenta));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      font-family: 'Montserrat Alternates', sans-serif;
+    }
+
+    .btn-logout {
+      padding: 7px 14px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text-mute);
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.18s ease;
+    }
+
+    .btn-logout:hover {
+      border-color: rgba(255,0,204,0.4);
+      color: var(--magenta);
+      background: rgba(255,0,204,0.05);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 40px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--cyan);
+      opacity: 0.7;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .hero h1 {
+      font-family: 'Montserrat Alternates', sans-serif;
+      font-weight: 700;
+      font-size: clamp(24px, 3vw, 32px);
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .hero h1 #userName {
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--text-mute);
+    }
+
+    /* ── ACTIONS ROW ── */
+    .actions-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.5s 0.08s ease both;
+    }
+
+    .btn-new {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan) 0%, #0090CC 100%);
+      border: none;
+      color: #000;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0,191,255,0.3);
+    }
+
+    .btn-new:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,191,255,0.4);
+      background: linear-gradient(135deg, #20CFFF 0%, var(--cyan) 100%);
+    }
+
+    .btn-new:active { transform: translateY(0); }
+
+    .btn-new svg { width: 16px; height: 16px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border2);
+      animation: fadeUp 0.5s 0.12s ease both;
+    }
+
+    /* ── PROJECT GRID ── */
+    #projectList {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      animation: fadeUp 0.5s 0.16s ease both;
+    }
+
+    /* Each project card — injected via JS */
+    .project-card {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 20px 20px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 120px;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.25s ease;
+    }
+
+    .project-card:hover {
+      border-color: rgba(0,191,255,0.3);
+      background: #1A1A1F;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,191,255,0.1);
+    }
+
+    .project-card:hover::before { transform: scaleX(1); }
+
+    .project-card-icon {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, rgba(0,191,255,0.15), rgba(255,0,204,0.1));
+      border: 1px solid rgba(0,191,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .project-card-icon svg { width: 16px; height: 16px; color: var(--cyan); }
+
+    .project-card-name {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--white);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .project-card-meta {
+      margin-top: auto;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--text-mute);
+    }
+
+    .empty-state svg {
+      width: 48px; height: 48px;
+      opacity: 0.25;
+      margin-bottom: 16px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .empty-state strong {
+      color: var(--cyan);
+      opacity: 0.7;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface2) 25%, #1E1E24 50%, var(--surface2) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+      height: 16px;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <nav class="topbar">
+    <a href="#" class="topbar-logo">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="21" stroke="#00BFFF" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <circle cx="24" cy="3"  r="2.5" fill="#00BFFF"/>
+        <circle cx="24" cy="45" r="2.5" fill="#00BFFF"/>
+        <circle cx="3"  cy="24" r="2.5" fill="#00BFFF"/>
+        <circle cx="45" cy="24" r="2.5" fill="#00BFFF"/>
+        <circle cx="24" cy="24" r="10" stroke="#00BFFF" stroke-width="1.5"/>
+        <text x="24" y="29" text-anchor="middle" font-family="Montserrat Alternates, sans-serif" font-weight="800" font-size="13" fill="#00BFFF">A</text>
+      </svg>
+      <span class="topbar-brand">AIM Notes</span>
+    </a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-title">My Projects</span>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-user">
+      <div class="avatar" id="userAvatar">?</div>
+      <span class="user-name" id="userNameNav"></span>
+    </div>
+    <a href="/api/auth/logout" class="btn-logout">Sign out</a>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="hero">
+      <div class="hero-eyebrow">// your workspace</div>
+      <h1>Welcome back, <span id="userName">...</span></h1>
+      <p class="hero-sub">All your notes and projects, in one place.</p>
+    </div>
+
+    <div class="actions-row">
+      <button class="btn-new" id="newProject">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Project
+      </button>
+    </div>
+
+    <div class="section-label">Recent projects</div>
+    <div id="projectList">
+      <!-- Cards injected by JS -->
+    </div>
+
+  </main>
+
+  <script>
+    // Fetch user
+    fetch('/api/me')
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('userName').textContent = data.name;
+        document.getElementById('userNameNav').textContent = data.name;
+        const initials = (data.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        document.getElementById('userAvatar').textContent = initials;
+      })
+      .catch(() => {
+        document.getElementById('userName').textContent = 'there';
+      });
+
+    // Fetch notes & render cards
+    fetch('/api/notes')
+      .then(r => r.json())
+      .then(data => {
+        const list = document.getElementById('projectList');
+        list.innerHTML = '';
+
+        if (!data.length) {
+          list.innerHTML = `
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6M9 16h6M9 8h2M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+              <p>No projects yet.<br/>Hit <strong>New Project</strong> to get started.</p>
+            </div>`;
+          return;
+        }
+
+        data.forEach((note, i) => {
+          const card = document.createElement('div');
+          card.className = 'project-card';
+          card.style.animationDelay = `${i * 0.05}s`;
+          card.style.animation = 'fadeUp 0.4s ease both';
+          card.innerHTML = `
+            <div class="project-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <div class="project-card-name">${escapeHTML(note.projectName)}</div>
+            <div class="project-card-meta">Open →</div>`;
+          card.onclick = () => { window.location.href = `/api/editor?id=${note.id}`; };
+          list.appendChild(card);
+        });
+      })
+      .catch(() => {
+        document.getElementById('projectList').innerHTML = `
+          <div class="empty-state"><p>Couldn't load projects. Please try again.</p></div>`;
+      });
+
+    // New project
+    document.getElementById('newProject').onclick = () => {
+      const name = prompt('Name your project:');
+      if (name && name.trim()) {
+        fetch('/api/notes', {
+          method: 'POST',
+          body: JSON.stringify({ projectName: name.trim() }),
+          headers: { 'Content-Type': 'application/json' }
+        }).then(r => { window.location.href = r.url; });
+      }
+    };
+
+    function escapeHTML(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+
+</body>
 </html>
