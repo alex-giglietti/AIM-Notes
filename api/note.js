@@ -11,15 +11,26 @@ export default async function handler (req, res) {
     if (!userEmail) {
         res.redirect('/index.html')
     } else {
-        const { id } = req.query
-        const { data, error } = await supabase
-        .from('AIM Notes')
-        .select()
-        .eq('id', `${id}`)
-        if (!error && data.length > 0 && data[0].userID === userEmail) {
-            res.json(data)
-        } else {
-            res.redirect('/api/projects')
+        if(req.method == 'GET'){
+            const { id } = req.query
+            const { data, error } = await supabase
+            .from('AIM Notes')
+            .select()
+            .eq('id', `${id}`)
+            if (!error && data.length > 0 && data[0].userID === userEmail) {
+                res.json(data)
+            } else {
+                res.redirect('/api/projects')
+            }
+        } else if (req.method == 'PUT') {
+            const { id, projectData } = req.body
+            const { error } = await supabase
+            .from('AIM Notes')
+            .update({ projectData: `${projectData}` })
+            .eq('id', id)
+            if(!error) res.status(200).end()
+                else res.send(error)
         }
+        
     }
 }

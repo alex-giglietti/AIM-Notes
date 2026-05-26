@@ -309,7 +309,9 @@
     </a>
     <div class="topbar-divider"></div>
     <h1 id="projectName"></h1>
-    <div class="topbar-spacer"></div>
+    <div class="topbar-spacer">
+        <span id="isSaved"></span>
+    </div>
     <a href="/api/projects" class="btn-back">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
@@ -412,7 +414,37 @@
       document.getElementById('projectName').textContent = projectName
       document.getElementById('editor').textContent = projectData
     })
-</script>
 
+    function saveNote() {
+        const projectData = document.getElementById('editor').value
+        fetch('/api/note', {
+            method: 'PUT',
+            body: JSON.stringify({ id, projectData}),
+            headers: { 'Content-Type': 'application/json'}
+        }).then(() => {
+            document.getElementById('isSaved').textContent = 'Saved'
+            setTimeout(() => {
+                document.getElementById('isSaved').textContent = ''
+            }, 5000) 
+        })
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault()
+            saveNote()
+        }
+    })
+
+    document.getElementById('editor').addEventListener('input', () => {
+        document.getElementById('isSaved').textContent = 'Not Saved'
+    })
+
+    setInterval(() => {
+        if(document.getElementById('isSaved').textContent != 'Saved') {
+        saveNote()
+        }
+    }, 300000)
+</script>
 </body>
 </html>
