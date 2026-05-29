@@ -30,6 +30,15 @@ export default async function handler (req, res) {
             .eq('id', id)
             if(!error) res.status(200).end()
                 else res.send(error)
+        } else if (req.method == 'DELETE') {
+            const { id } = req.query
+            const response = await supabase
+            .from('AIM Notes')
+            .delete()
+            .eq('id', id)
+            if (!response.error) {
+                res.status(200).end()
+            } else res.send(response.error)
         }
         
     }

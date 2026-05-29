@@ -412,11 +412,11 @@
     .then(data => {
       const { projectName, projectData } = data[0]
       document.getElementById('projectName').textContent = projectName
-      document.getElementById('editor').textContent = projectData
+      document.getElementById('editor').innerHTML = projectData
     })
 
     function saveNote() {
-        const projectData = document.getElementById('editor').value
+        const projectData = document.getElementById('editor').innerHTML
         fetch('/api/note', {
             method: 'PUT',
             body: JSON.stringify({ id, projectData}),

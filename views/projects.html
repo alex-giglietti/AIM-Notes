@@ -426,7 +426,8 @@
               </svg>
             </div>
             <div class="project-card-name">${escapeHTML(note.projectName)}</div>
-            <div class="project-card-meta">Open →</div>`;
+            <div class="project-card-meta">Open →</div>;
+            <button onclick="deleteProject(event, ${note.id})">Delete</button>`;
           card.onclick = () => { window.location.href = `/api/editor?id=${note.id}`; };
           list.appendChild(card);
         });
@@ -450,6 +451,19 @@
 
     function escapeHTML(str) {
       return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function deleteProject(e, id) {
+      e.stopPropagation()
+        fetch(`/api/note?id=${id}`, {
+          method: 'DELETE',
+          body: '',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+          if (res.ok) {
+            window.location.reload();
+          }
+        })
     }
   </script>
 
