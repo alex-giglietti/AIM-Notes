@@ -457,7 +457,6 @@
       e.stopPropagation()
         fetch(`/api/note?id=${id}`, {
           method: 'DELETE',
-          body: '',
           headers: { 'Content-Type': 'application/json' }
         }).then(res => {
           if (res.ok) {
