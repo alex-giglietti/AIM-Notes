@@ -151,13 +151,11 @@ server.registerTool (
     }
 )
 
-async function main() {
-    const transport = new StreamableHTTPServerTransport()
+export default async function handler(req, res) {
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined
+    })
+    
     await server.connect(transport)
-    console.error('Notes MCP running via http')
-}
-
-main().catch((error) => {
-    console.error("Fatal error in main()", error)
-    process.exit(1)
-})
+    await transport.handleRequest(req, res, req.body)
+  }
